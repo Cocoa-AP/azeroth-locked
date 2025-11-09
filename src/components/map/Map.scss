@@ -1,0 +1,17 @@
+.highlighted {
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 1;
+}
+
+.region-locked {
+  fill: rgba(0, 0, 0, 0.55);
+}
+
+.region-locked:not(.highlighted) {
+  stroke: rgba(0, 0, 0, 0.8);
+  stroke-width: 1;    /* gray overlay */
+}
+
+.region-unlocked {
+  fill: transparent;            /* full color shows through */
+}
