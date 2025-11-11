@@ -9,6 +9,12 @@ export default defineConfig({
         plugins: [['babel-plugin-react-compiler']],
       },
     }),
-  ],
+  ],css: {
+    preprocessorOptions: {
+      scss: {
+      }
+    }
+  },
+
   base: '/azeroth-locked/',
 })

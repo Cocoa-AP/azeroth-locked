@@ -4,10 +4,12 @@ import backgroundImage from '/eastern-kingdom-map-final.png'
 import * as React from "react";
 import {newEncodedState} from "../../services/Encoder.tsx";
 import { useAtom } from 'jotai';
-import {areaState} from '../../states/AreaState.tsx';
+import {areaCodeState, areaState, HighlightNeighbors} from '../../states/AreaState.tsx';
 
 function Map() {
-    const [areas, setAreas] = useAtom(areaState)
+    const [areas, setAreas] = useAtom(areaState);
+
+    const [_, setAreaCode] = useAtom(areaCodeState);
 
     const imgRef = React.useRef<HTMLImageElement | null>(null);
     const [size, setSize] = React.useState({width: ORIG_WIDTH, height: ORIG_HEIGHT});
@@ -21,6 +23,9 @@ function Map() {
                 setSize({width, height});
             }
         });
+
+        HighlightNeighbors(areas);
+
         ro.observe(imgRef.current);
         if (!sizeSet) setSizeSet(true);
         return () => ro.disconnect();
@@ -82,7 +87,14 @@ function Map() {
                                                                 : prevArea
                                                         );
 
-                                                        newEncodedState(areas);
+                                                        const sessionCode = newEncodedState(next);
+
+                                                        setAreaCode(_ => {
+                                                            return sessionCode;
+                                                        });
+
+                                                        HighlightNeighbors(next);
+
                                                         return next;
                                                     });
                                                 }}
@@ -103,7 +115,6 @@ function Map() {
                         }}>
                         {areas.map((area) => {
                             const locked = area.locked;
-                            const highlight = area.highlight;
                             return (
                                 <polygon
                                     data-id={area.id}
@@ -113,9 +124,6 @@ function Map() {
                                         region 
                                         ${
                                         locked ? 'region-locked' : 'region-unlocked'
-                                    } 
-                                        ${
-                                        highlight ? 'highlighted' : ''
                                     }`
                                     }
 

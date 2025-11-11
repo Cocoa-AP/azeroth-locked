@@ -4,7 +4,8 @@ export interface Area {
     dataValue: string;
     coords: string;
     locked: boolean;
-    highlight?: boolean;
+    neighbors?: string[];
+    neighborIds?: string[];
 }
 export const ORIG_WIDTH = 900;
 export const ORIG_HEIGHT = 600;
@@ -58,6 +59,8 @@ export const Areas: Area[] = [
         id: "a3",
         location: "Elwynn Forest",
         dataValue: "3",
+        neighbors: ['Westfall', 'Dun Morogh', 'Redridge Mountains'],
+        neighborIds: ['a7', 'a11', 'a4'],
         locked: false,
         coords: "383,462, 378,458, 376,454, 376,449, 375,445, 378,438, 375,435, 374,430, 372,425, 368,424, 366,420, 367,415, 372,413, 377,413, 384,413, 390,413, 394,413, 400,414, 405,417, 408,422, 411,428, 418,433, 425,435, 429,438, 433,443, 435,447, 436,453, 436,458, 437,464, 433,465, 428,466, 423,465, 417,464, 412,464, 408,465, 403,467, 400,469, 394,469, 390,468, 386,471, 384,468"
     },

@@ -1,13 +1,31 @@
+.selected-area {
+  fill: rgba(0, 0, 255, 0.2);
+  stroke: rgba(0,0,255,0.8);
+  stroke-width: 1;
+}
+
+.potential-select {
+  stroke: rgba(0, 255, 0, 0.8);
+  fill: rgba(0, 255, 0, 0.2);
+  stroke-width: 1;
+}
+
+.viable-neighbor:not(.potential-select):not(.selected-area) {
+  stroke: rgba(255, 0, 0, 0.8);
+  fill: rgba(255, 0, 0, 0.2);
+  stroke-width: 1;
+}
+
 .highlighted {
   stroke: rgba(255, 255, 255, 0.8);
   stroke-width: 1;
 }
 
-.region-locked {
+.region-locked:not(.viable-neighbor):not(.potential-select) {
   fill: rgba(0, 0, 0, 0.55);
 }
 
-.region-locked:not(.highlighted) {
+.region-locked:not(.highlighted):not(.viable-neighbor):not(.potential-select) {
   stroke: rgba(0, 0, 0, 0.8);
   stroke-width: 1;    /* gray overlay */
 }
