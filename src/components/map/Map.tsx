@@ -1,18 +1,18 @@
 import './Map.scss'
-import {ORIG_WIDTH, ORIG_HEIGHT, scaleCoords} from "./area.models.tsx";
-import backgroundImage from '/eastern-kingdom-map-final.png'
+import {EK_Mods, scaleCoords} from "./area.models.tsx";
+import backgroundImage from '/EK-MAP.png'
 import * as React from "react";
 import {newEncodedState} from "../../services/Encoder.tsx";
 import { useAtom } from 'jotai';
-import {areaCodeState, areaState, HighlightNeighbors} from '../../states/AreaState.tsx';
+import {$areaCodeState, $areaState, HighlightNeighbors} from '../../states/AreaState.tsx';
 
 function Map() {
-    const [areas, setAreas] = useAtom(areaState);
+    const [areas, setAreas] = useAtom($areaState);
 
-    const [_, setAreaCode] = useAtom(areaCodeState);
+    const [_, setAreaCode] = useAtom($areaCodeState);
 
     const imgRef = React.useRef<HTMLImageElement | null>(null);
-    const [size, setSize] = React.useState({width: ORIG_WIDTH, height: ORIG_HEIGHT});
+    const [size, setSize] = React.useState({width: EK_Mods.originalWidth, height: EK_Mods.originalHeight});
     const [sizeSet, setSizeSet] = React.useState(false);
 
     React.useEffect(() => {
@@ -37,9 +37,8 @@ function Map() {
                 <div
                     style={{
                         position: 'relative',
-                        width: '100vh',
-                        minHeight: ORIG_HEIGHT,
-                        minWidth: ORIG_WIDTH,
+                        minHeight: size.height,
+                        minWidth: size.width,
                     }}>
                     <img
                         ref={imgRef}
@@ -47,7 +46,7 @@ function Map() {
                         src={backgroundImage}
                         alt=""
                         useMap="#themap"
-                        style={{width: '100%', height: 'auto', display: 'block'}}
+                        style={{height: 'auto', display: 'block'}}
                     />
                     {
                         sizeSet && (
@@ -65,7 +64,7 @@ function Map() {
                                                 alt={area.location}
                                                 title={area.location}
                                                 shape="poly"
-                                                coords={scaleCoords(area.coords, size.width, size.height)}
+                                                coords={scaleCoords(area.coords, EK_Mods, size.width, size.height)}
                                                 onMouseEnter={_ => {
                                                     if (!isLocked) return;
                                                     document.querySelector(`polygon[data-id="${area.id}"]`)?.classList.add('highlighted');
@@ -107,11 +106,12 @@ function Map() {
                         )
                     }
                     <svg
-                        viewBox={`0 0 ${ORIG_WIDTH} ${ORIG_HEIGHT}`}
+                        viewBox={`0 0 ${size.width} ${size.height}`}
                         style={{
                             position: 'absolute',
                             inset: 0,
                             pointerEvents: 'none', // clicks go through to <area>
+
                         }}>
                         {areas.map((area) => {
                             const locked = area.locked;
@@ -119,7 +119,7 @@ function Map() {
                                 <polygon
                                     data-id={area.id}
                                     key={area.id}
-                                    points={area.coords}
+                                    points={scaleCoords(area.coords, EK_Mods, size.width, size.height)}
                                     className={`
                                         region 
                                         ${

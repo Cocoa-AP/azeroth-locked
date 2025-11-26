@@ -1,4 +1,5 @@
 import type {Area} from "../map/area.models.tsx";
+import {HighlightArea} from "../../services/Areas.service.tsx";
 
 /**
  * stringToSeed - converts a string to a seed for a random number generator
@@ -40,28 +41,6 @@ function mulberry32(seed: number): () => number {
     };
 }
 
-interface AnimationSettings {
-    duration: number;
-    initialRate: number;
-    finalRate: number;
-}
-
-function clearPotentialSelect() {
-    document.querySelectorAll('.potential-select').forEach(element => {
-        element.classList.remove('potential-select');
-    });
-}
-
-function highlightArea(areaId: string) {
-    clearPotentialSelect();
-    document.querySelector(`polygon[data-id="${areaId}"]`)?.classList.add('potential-select');
-}
-
-function selectArea(areaId: string) {
-    clearPotentialSelect();
-    document.querySelector(`polygon[data-id="${areaId}"]`)?.classList.add('selected-area');
-}
-
 /**
  * Randomizer - returns a random area from an array of viable areas
  *
@@ -71,19 +50,22 @@ function selectArea(areaId: string) {
  */
 export function Randomizer(viableAreas: Area[], seed?: string): Promise<Area> {
     return new Promise((resolve) => {
-        const settings: AnimationSettings = {
-            duration: 10_000,   // 10 seconds total
-            initialRate: 10,     // 7 selections / second
-            finalRate: 1        // 1 selection / second
-        };
-
-        // --- seeded RNG for final choice ---
+        // seeded RNG for final choice
         const epochTime = Date.now();
         const combinedSeed = seed ? `${seed}_${epochTime}` : epochTime.toString();
         const numericSeed = stringToSeed(combinedSeed);
         const random = mulberry32(numericSeed);
-        const finalIndex = Math.floor(random() * viableAreas.length);
 
+        const duration = 7_000 + (random() * 8_000);
+        
+        const settings = {
+            duration: duration,  // 7-15 seconds
+            initialRate: 10,    // 7 selections per second
+            finalRate: 1       // 1 selection per second
+        };
+
+        let index = Math.floor(random() * viableAreas.length);
+        
         const startTime = Date.now();
 
         const animate = () => {
@@ -92,22 +74,20 @@ export function Randomizer(viableAreas: Area[], seed?: string): Promise<Area> {
             const progress = Math.min(1, elapsed / settings.duration);
 
             if (progress < 1) {
-                // linearly reduce *rate* from 7 → 1 selections/sec
+                // Linearly reduce rate
                 const currentRate =
                     settings.initialRate +
                     (settings.finalRate - settings.initialRate) * progress;
 
-                // convert rate to delay in ms
                 const delay = 1000 / currentRate;
 
-                const randomIndex = Math.floor(Math.random() * viableAreas.length);
-                highlightArea(viableAreas[randomIndex].id);
+                // Highlight next area in sequence
+                HighlightArea(viableAreas[index].id);
+                index = (index + 1) % viableAreas.length;
 
                 setTimeout(animate, delay);
             } else {
-                // final selection
-                selectArea(viableAreas[finalIndex].id);
-                resolve(viableAreas[finalIndex]);
+                resolve(viableAreas[index]);
             }
         };
 

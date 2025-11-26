@@ -37,6 +37,14 @@
 
 }
 
+.wow-button-waiting {
+    display: block;
+}
+
+.wow-button-waiting:hover {
+    cursor: wait;
+}
+
 .wow-button-text{
     cursor: pointer;
     font-family: 'Warcraft';

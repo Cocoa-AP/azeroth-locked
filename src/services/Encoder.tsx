@@ -1,4 +1,4 @@
-import {type Area, Areas} from "../components/map/area.models.tsx";
+import {type Area, EasternKingdomAreas} from "../components/map/area.models.tsx";
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const BASE = ALPHABET.length; // 62
@@ -26,7 +26,7 @@ export function newEncodedState(areas: Area[]):string {
     return sessionCode;
 }
 
-export function newDecodeLockedState(code: string): Area[] {
+export function newDecodeLockedState(_areas:Area[], code: string): Area[] {
     // 1️⃣ Convert base-62 → number
     let num = BigInt(0);
     for (const char of code) {
@@ -35,16 +35,17 @@ export function newDecodeLockedState(code: string): Area[] {
     }
 
     // 2️⃣ Convert number → binary string
-    let bits = num.toString(2).padStart(Areas.length, '0');
+    let bits = num.toString(2).padStart(_areas.length, '0');
 
     // 3️⃣ Map back to areas
-    return Areas.map((area, i) => ({
+    const areas= _areas.map((area, i) => ({
         id: area.id,
         locked: bits[i] === '1',
         location: area.location,
-        dataValue: area.dataValue,
         coords: area.coords,
         neighborIds: area.neighborIds,
-        neighbors: area.neighbors,
+        neighbors: area.neighborsss,
     }));
+
+    return areas;
 }

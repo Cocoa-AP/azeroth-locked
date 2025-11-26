@@ -5,13 +5,20 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {SvgIcon} from "@mui/material";
 import {newDecodeLockedState} from "./services/Encoder.tsx";
-import {areaCodeState, areaState} from "./states/AreaState.tsx";
+import {
+    $areaCodeState,
+    $areaState,
+    $buttonState,
+    $unlockedArea,
+    ButtonState,
+    HighlightNeighbors
+} from "./states/AreaState.tsx";
 import {useAtom} from 'jotai';
 import {useEffect} from "react";
-import {Areas} from "./components/map/area.models.tsx";
+import {EasternKingdomAreas} from "./components/map/area.models.tsx";
 import buttonImage from '/button-wide.png'
 import {Randomizer} from "./components/randomizer/Randomizer.tsx";
-import {GetViableAreas} from "./services/Areas.service.tsx";
+import {UnlockArea, GetViableAreas, SelectArea} from "./services/Areas.service.tsx";
 
 function clearStorage() {
     sessionStorage.clear();
@@ -22,17 +29,46 @@ function App() {
 
     //TODO: configure areas based on stored data or config key
 
-    const [areas, setAreas] = useAtom(areaState);
-    const [_, setAreaCode] = useAtom(areaCodeState);
-    const areasCode = sessionStorage.getItem('areas');
+    const [buttonState, setButtonState] = useAtom($buttonState);
+
+    const [unlockedArea, setUnlockedArea] = useAtom($unlockedArea);
+    const [areas, setAreas] = useAtom($areaState);
+    const [_, setAreaCode] = useAtom($areaCodeState);
 
     useEffect(() => {
+        const areasCode = sessionStorage.getItem('areas');
         if (areasCode) {
-            setAreas(newDecodeLockedState(areasCode));
+            setAreas(newDecodeLockedState(EasternKingdomAreas, areasCode));
             setAreaCode(areasCode);
+            HighlightNeighbors(areas);
         }
-    }, [areasCode]);
+    });
 
+    function RollClicked() {
+        if (buttonState === ButtonState.Roll) {
+            setButtonState(ButtonState.Rolling);
+            Randomizer(GetViableAreas(areas), '1231231231232').then(area => {
+
+                // End on final seeded index
+                SelectArea(area.id);
+                setUnlockedArea(area);
+                setButtonState('Unlock');
+            })
+        } else if (buttonState === ButtonState.Unlock) {
+            let areaId = '';
+            setAreas(areas.map(area => {
+                if (area.id === unlockedArea?.id) {
+                    areaId = area.id
+                    area.locked = false;
+                }
+                return area;
+            }))
+            HighlightNeighbors(areas);
+            UnlockArea(areaId);
+            setButtonState(ButtonState.Roll);
+        }
+
+    }
 
     return (
         <>
@@ -52,8 +88,9 @@ function App() {
                 <SvgIcon component={RefreshIcon} inheritViewBox
                          className="absolute right-0 top-0 mr-8 mt-4 cursor-pointer"
                          onClick={() => {
-                             clearStorage()
-                             setAreas(Areas)
+                             clearStorage();
+                             // TODO: get serialized areas from storage, else do static areas
+                             setAreas(EasternKingdomAreas);
                              setAreaCode('');
                          }
                          }/>
@@ -63,16 +100,13 @@ function App() {
                         <img
                             src={buttonImage}
                             alt="roll button"
-                            className="wow-button"
-                            onClick={() => {
-                                Randomizer(GetViableAreas(areas))
-                            }}
+                            className={buttonState === ButtonState.Rolling ? "wow-button-waiting" : "wow-button"}
+                            onClick={buttonState === ButtonState.Rolling ? undefined : () => RollClicked()}
+
                         />
                         <a className="wow-button-text absolute pt-2  flex
-                                      justify-content-center align-items-center "
-
-                        >
-                            Roll!
+                                      justify-content-center align-items-center ">
+                            {buttonState}!
                         </a>
                     </div>
                 </div>
