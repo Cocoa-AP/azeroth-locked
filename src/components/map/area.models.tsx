@@ -12,7 +12,6 @@ export interface Area {
     coords: string;
     locked: boolean;
     neighbors:  NeighborLink[];
-    neighborsss?: string[];
     neighborIds?: string[];
 }
 

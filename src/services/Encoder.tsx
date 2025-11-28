@@ -1,4 +1,4 @@
-import {type Area, EasternKingdomAreas} from "../components/map/area.models.tsx";
+import {type Area} from "../components/map/area.models.tsx";
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const BASE = ALPHABET.length; // 62
@@ -37,15 +37,23 @@ export function newDecodeLockedState(_areas:Area[], code: string): Area[] {
     // 2️⃣ Convert number → binary string
     let bits = num.toString(2).padStart(_areas.length, '0');
 
-    // 3️⃣ Map back to areas
-    const areas= _areas.map((area, i) => ({
-        id: area.id,
-        locked: bits[i] === '1',
-        location: area.location,
-        coords: area.coords,
-        neighborIds: area.neighborIds,
-        neighbors: area.neighborsss,
-    }));
+    let areas: Area[] = [];
+
+    if (_areas) {
+        areas = _areas.filter((area) => {
+            return area
+        }).map((area, i) => ({
+            id: area.id,
+            locked: bits[i] === '1',
+            location: area.location,
+            coords: area.coords,
+            neighborIds: area.neighborIds,
+            neighbors: area.neighbors
+        }));
+    }
+
+
 
     return areas;
+
 }
